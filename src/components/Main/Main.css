@@ -1,0 +1,174 @@
+/* Загальні стилі */
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  max-width: 620px;
+  width: 100%;
+}  
+
+.form-header {
+  margin-bottom: 60px;
+  background: #64255c;
+  color: #fff;
+  padding: 32px 32px 16px 32px;
+  border-radius: 14px;
+  text-align: left;
+  font-size: 1.7rem;
+  font-weight: 600;
+  position: relative;
+  box-shadow: 0 2px 12px rgba(100, 37, 92, 0.10);
+}
+.form-header::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  bottom: 16px;
+  width: 8px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #b24592 0%, #64255c 100%);
+}
+
+section {
+  margin-bottom: 60px;
+  text-align: left;
+  align-items: center;
+  justify-content: flex-start;    
+}
+/* - чому не працює */
+
+/* Офер */
+h1 {
+  margin-bottom: 60px; 
+  font-size: 26px;
+}
+/* Заголовки етапів */
+h2 {
+  font-weight: 600;
+  font-size: 22px;
+}
+
+h3 {
+  font-weight: 300;
+}
+/* Секція стать та вік */
+.Bio {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-bottom: 5px;
+}
+
+.gender {
+  margin: 3px;
+  display: flex;
+  flex-direction: row;
+  font-size: 14px;
+}
+  .h-Bio {
+    margin: 25px 3px;
+    font-size: 18px;
+  }
+
+.vertical-divider {
+  width: 1px;             /* товщина лінії */
+  height: 78px;           /* висота */
+  background-color: #000; /* або будь-який інший колір */
+  box-shadow: 
+  -3px 0 15px rgba(0, 0, 0, 0.3),  /* тінь зліва */
+   3px 0 15px rgba(0, 0, 0, 0.3);  /* тінь справа */
+   margin: 0px 20px 0px 20px;
+}
+
+.age {
+  margin: 3px;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  font-size: 14px;
+}
+ .input-age {   /* Поле "Вік" */
+   max-width: 100px;
+   margin: 0px 20px 0px 10px;
+ }
+
+
+
+/* Стилі всіх кнопок вибору */
+button {
+  display: inline-block;
+  padding: 10px 16px;
+  margin: 5px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+}
+/* Стилі підсвітки всіх кнопок вибору */
+button:hover {
+  background-color: #e6e6e6;
+}
+
+button.selected {
+  background-color: #d0f0d0;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px #bfdbfe;
+  font-weight: 400;
+}
+
+button.active {
+  background: #d0f0d0;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Стилі функціональних кнопок*/
+/* Стиль кнопки "Згенерувати привітання" */
+/* Поля "Свій варіант" */
+input {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+/* Поля "Деталі" */
+/* Стиль відображення фото отримувча */
+/* Стиль Генерації листівки */
+
+
+.limit-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.fixedButtonBox {
+  position: fixed;       
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 10px;
+}
+
