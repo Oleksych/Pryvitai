@@ -11,6 +11,13 @@ import "./Main.css";
 import MainButton from "./MainButton";
 import { getFormProgress } from "../../utils/formProgress";
 import { useEffect, useRef, useState } from "react";
+import CardStyleSection from "./CardStyleSection";
+import CardMoodSection from "./CardMoodSection";
+import PhotoSection from "./PhotoSection";
+import BioSection from "./BioSection";
+import HobbiSection from "./HobbiSection";
+import GreetingTextSection from "./GreetingTextSection";
+import MainDuplicateBtn from "./MainDuplicateBtn";
 
 export const Main = () => {
   const [formData, setFormData] = useState({
@@ -245,181 +252,35 @@ const handleSubmit = async (e) => {
         <form onSubmit={handleSubmit}>
 
 
-        <section>
-            <h2>Стиль </h2>
-            {cardStyleOptions.map((style) => (
-              <button
-                key={style}
-                type="button"
-                onClick={() => {
-                  handleOptionSelect("cardStyle", style);
-                  setCustomCardStyle("");
-                }}
-                className={
-                  formData.cardStyle === style && customCardStyle === ""
-                    ? "active"
-                    : ""
-                }
-              >
-                {style}
-              </button>
-            ))}
+<CardStyleSection
+  cardStyleOptions={cardStyleOptions}
+  formData={formData}
+  customCardStyle={customCardStyle}
+  setCustomCardStyle={setCustomCardStyle}
+  handleOptionSelect={handleOptionSelect}
+/>
 
-            <input
-              type="text"
-              placeholder="Ваш варіант - наприклад: в стилі мультика Енеїда"
-              value={customCardStyle}
-              onChange={(e) => {
-                setCustomCardStyle(e.target.value);
-                setFormData((prev) => ({ ...prev, cardStyle: e.target.value }));
-              }}
-            />
-          </section>
+<CardMoodSection
+  cardMoodOptions={cardMoodOptions}
+  formData={formData}
+  customCardMood={customCardMood}
+  setCustomCardMood={setCustomCardMood}
+  handleOptionSelect={handleOptionSelect}
+/>
 
+<PhotoSection
+  formData={formData}
+  setFormData={setFormData}
+/>
 
+<BioSection
+  formData={formData}
+  handleOptionSelect={handleOptionSelect}
+  genderOptions={genderOptions}
+  filteredOptions={filteredOptions}
+/>
 
-          <section>
-            <h2>Настрій </h2>
-            {cardMoodOptions.map((style) => (
-              <button
-                key={style}
-                type="button"
-                onClick={() => {
-                  handleOptionSelect("cardMood", style);
-                  setCustomCardMood("");
-                }}
-                className={
-                  formData.cardMood === style && customCardMood === ""
-                    ? "active"
-                    : ""
-                }
-              >
-                {style}
-              </button>
-            ))}
-
-            <input
-              type="text"
-              placeholder="Ваш варіант - наприклад: настрій дружнього підколу"
-              value={customCardMood}
-              onChange={(e) => {
-                setCustomCardMood(e.target.value);
-                setFormData((prev) => ({ ...prev, cardMood: e.target.value }));
-              }}
-            />
-          </section>
-         
-          <section>
-  <h2>Фото для персоналізації</h2>
-  <h3>Додайте фото яке асоціюється з отримувачем привітання, з його захопленнями, діяльністю або стилем</h3>
-  {/* <input
-    type="text"
-    placeholder="напр. підтягнутий, має гарний ніс..."
-    value={formData.appearanceDescription}
-    onChange={handleInputChange("appearanceDescription")}
-  /> */}
-
-  <div className="mt-2">
-    <label
-      className="custom-upload-button"
-      style={{
-        display: "inline-block",
-        padding: "8px 16px",
-        backgroundColor: "#007bff",
-        color: "white",
-        borderRadius: "8px",
-        cursor: "pointer",
-        marginTop: "10px",
-      }}
-    >
-      Додати фото
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (file) {
-            setFormData((prev) => ({
-              ...prev,
-              photoFile: file,
-              photoPreview: URL.createObjectURL(file),
-            }));
-          }
-        }}
-        style={{ display: "none" }}
-      />
-    </label>
-
-    {formData.photoFile && (
-      <div className="mt-2">
-        <img
-          src={formData.photoPreview}
-          alt="Прев’ю фото"
-          style={{
-            maxWidth: "250px",
-            marginTop: "10px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-          }}
-        />
-      </div>
-    )}
-  </div>
-</section>
-
-
-
-          <section>
-            {/* <h3>Стать та вік не обов'язково або приблизно - для генерації зображення</h3> */}
-
-            <div className="Bio">
-
-            <section className="gender">
-            <h2 className="h-Bio">Cтать</h2>
-            {genderOptions.map((gender) => (
-              <button
-                type="button"
-                key={gender}
-                onClick={() => handleOptionSelect("gender", gender)}
-                className={formData.gender === gender ? "active" : ""}
-              >
-                {gender}
-              </button>
-            ))}
-          </section>
-          {/* <div className="vertical-divider"></div> */}
-          <section className="age">
-            <h2 className="h-Bio">Вік</h2>
-            <input className="input-age"
-              type="number"
-              min="0"
-              max="115"
-              value={formData.age}
-              onChange={(e) => handleOptionSelect("age", e.target.value)}
-              placeholder="Введіть вік"
-            />
-          </section>
-
-          </div>
-
-
-            {filteredOptions.map((option) => {
-              const isActive = formData.person === option.label;
-              return (
-                <button
-                  type="button"
-                  key={option.label}
-                  onClick={() => handleOptionSelect("person", option.label)}
-                  className={isActive ? "active" : ""}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-
-
-          </section>
-
+{/* Наступна секція з чим вітаємо піде до сторінки: "FirstText" */}
           {/* <section>
             <h2>З чим вітаємо?</h2>
 
@@ -451,64 +312,18 @@ const handleSubmit = async (e) => {
             />
           </section> */}
 
-          <section>
-            <h2>Атрибути та символи</h2>
+<HobbiSection
+  formData={formData}
+  handleOptionSelect={handleOptionSelect}
+  customHobby={customHobby}
+  optionsHobbies={optionsHobbies}
+/>
 
-            {optionsHobbies.map((option) => {
-              const isActive = formData.hobbies.includes(option);
-              const isDisabled =
-                !isActive && formData.hobbies.length >= 4 && customHobby === "";
-
-              return (
-                <button
-                  type="button"
-                  key={option}
-                  onClick={() => handleOptionSelect("hobbies", option)}
-                  className={isActive ? "active" : ""}
-                  disabled={isDisabled}
-                >
-                  {option}
-                </button>
-              );
-            })}
-
-            <input
-              type="text"
-              placeholder="Ваш деталізований варіант - наприклад: білий сучасний автомобіль рено в кузові універсал"
-              value={
-                formData.hobbies.length > 0 &&
-                formData.hobbies.every((hobby) => optionsHobbies.includes(hobby))
-                  ? ""
-                  : customHobby
-              }
-              onChange={(e) => handleOptionSelect("customHobby", e.target.value)}
-              disabled={formData.hobbies.length >= 4}
-            />
-
-            {formData.hobbies.length >= 4 && customHobby === "" && (
-              <p className="limit-message">Максимум 4 варіанти</p>
-            )}
-          </section>
-
-
-
-
-          <section>
-            <h2>Текст привітання</h2>
-            <input
-              type="text"
-              placeholder="Наприклад: Бажаю кошачої грайливості та спокою не зважаючи на обставини"
-              value={formData.storyText}
-              onChange={handleInputChange("greetingText")}
-            />
-            <button type="button" onClick={showGreetingIdeas}>
-              Згенерувати ідеї тексту
-            </button>
-          </section>
-
-
-
-
+<GreetingTextSection
+  formData={formData}
+  handleInputChange={handleInputChange}
+  showGreetingIdeas={showGreetingIdeas}
+/>
 
           {/* <section>
             <h2>Фон</h2>
@@ -524,23 +339,15 @@ const handleSubmit = async (e) => {
             </button>
           </section> */}
 
-
-
   {/* Дублююча кнопка внизу контенту */}
-  <button
-    ref={duplicateBtnRef}
-    className={progress ? `MainBtn${Math.max(1, Math.min(progress.score, 6))}` : "MainBtn1"}
-    type="submit"
-    disabled={(progress && progress.score < 1) || loading}
-    // style={{ width: "296px", margin: "32px 0" }}
-  >
-    {loading ? "Генеруємо привітайку..." : "Згенерувати зображення"}
-  </button>
-
+  <MainDuplicateBtn
+  progress={progress}
+  loading={loading}
+  duplicateBtnRef={duplicateBtnRef}
+/>
   {/* Фіксований MainButton показується лише якщо клавіатура закрита і дублююча кнопка не видима */}
   {!isKeyboardOpen && isFixedButtonVisible && <MainButton loading={loading} progress={progress} />}
 
-  <div style={{ height: "160px" }}></div> {/* просто відступ */}
         </form>
       </div>
     </div>
