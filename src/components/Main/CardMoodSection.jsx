@@ -1,8 +1,8 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
-export default function CardMoodSection({ cardMoodOptions, formData, customCardMood, setCustomCardMood, handleOptionSelect }) {
+const CardMoodSection = forwardRef(function CardMoodSection({ cardMoodOptions, formData, customCardMood, setCustomCardMood, handleOptionSelect, scrollToNextSection }, ref) {
   return (
-    <section>
+    <section ref={ref}>
       <h2>Настрій</h2>
       {cardMoodOptions.map((style) => (
         <button
@@ -11,6 +11,7 @@ export default function CardMoodSection({ cardMoodOptions, formData, customCardM
           onClick={() => {
             handleOptionSelect("cardMood", style);
             setCustomCardMood("");
+            if (scrollToNextSection) scrollToNextSection();
           }}
           className={formData.cardMood === style && customCardMood === "" ? "active" : ""}
         >
@@ -28,4 +29,6 @@ export default function CardMoodSection({ cardMoodOptions, formData, customCardM
       />
     </section>
   );
-} 
+});
+
+export default CardMoodSection; 

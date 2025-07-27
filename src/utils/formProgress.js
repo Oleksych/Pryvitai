@@ -14,8 +14,10 @@ const GROUPS = [
   // дані4
   { name: 'hobbies/hobbiesDescription/customHobby', keys: ['hobbies', 'hobbiesDescription', 'customHobby'] },
   // дані5
-  { name: 'greetingSubject/customGreetingSubject', keys: ['greetingSubject', 'customGreetingSubject'] },
+  { name: 'traits/customTrait', keys: ['traits', 'customTrait'] },
   // дані6
+  { name: 'greetingSubject/customGreetingSubject', keys: ['greetingSubject', 'customGreetingSubject'] },
+  // дані7
   { name: 'greetingText', keys: ['greetingText'] },
 ];
 

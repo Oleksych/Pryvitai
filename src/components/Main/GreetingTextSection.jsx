@@ -1,18 +1,23 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
-export default function GreetingTextSection({ formData, handleInputChange, showGreetingIdeas }) {
+const GreetingTextSection = forwardRef(function GreetingTextSection({ formData, handleInputChange, showGreetingIdeas, scrollToNextSection }, ref) {
   return (
-    <section>
+    <section ref={ref}>
       <h2>Текст привітання</h2>
       <input
         type="text"
         placeholder="Наприклад: Бажаю кошачої грайливості та спокою не зважаючи на обставини"
-        value={formData.storyText}
+        value={formData.greetingText}
         onChange={handleInputChange("greetingText")}
       />
-      <button type="button" onClick={showGreetingIdeas}>
-        Згенерувати ідеї тексту
+      <button type="button" onClick={() => {
+        showGreetingIdeas();
+        if (scrollToNextSection) scrollToNextSection();
+      }}>
+        Переглянути ідеї тексту
       </button>
     </section>
   );
-} 
+});
+
+export default GreetingTextSection; 

@@ -1,8 +1,8 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
-export default function CardStyleSection({ cardStyleOptions, formData, customCardStyle, setCustomCardStyle, handleOptionSelect }) {
+const CardStyleSection = forwardRef(function CardStyleSection({ cardStyleOptions, formData, customCardStyle, setCustomCardStyle, handleOptionSelect, scrollToNextSection }, ref) {
   return (
-    <section>
+    <section ref={ref}>
       <h2>Стиль</h2>
       {cardStyleOptions.map((style) => (
         <button
@@ -11,6 +11,7 @@ export default function CardStyleSection({ cardStyleOptions, formData, customCar
           onClick={() => {
             handleOptionSelect("cardStyle", style);
             setCustomCardStyle("");
+            if (scrollToNextSection) scrollToNextSection();
           }}
           className={formData.cardStyle === style && customCardStyle === "" ? "active" : ""}
         >
@@ -28,4 +29,6 @@ export default function CardStyleSection({ cardStyleOptions, formData, customCar
       />
     </section>
   );
-} 
+});
+
+export default CardStyleSection; 

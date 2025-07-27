@@ -1,13 +1,13 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
-export default function HobbiSection({
+const HobbiSection = forwardRef(function HobbiSection({
   formData,
   handleOptionSelect,
   customHobby,
-  optionsHobbies,
-}) {
+  optionsHobbies
+}, ref) {
   return (
-    <section>
+    <section ref={ref}>
             <h2>Атрибути та символи</h2>
 
             {optionsHobbies.map((option) => {
@@ -46,4 +46,6 @@ export default function HobbiSection({
             )}
           </section>
   );
-}
+});
+
+export default HobbiSection;

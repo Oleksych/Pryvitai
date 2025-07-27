@@ -1,13 +1,14 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
-export default function BioSection({
+const BioSection = forwardRef(function BioSection({
   formData,
   handleOptionSelect,
   genderOptions,
-  filteredOptions
-}) {
+  filteredOptions,
+  scrollToNextSection
+}, ref) {
   return (
-    <section>
+    <section ref={ref}>
       <div className="Bio">
         <section className="gender">
           <h2 className="h-Bio">Cтать</h2>
@@ -23,7 +24,8 @@ export default function BioSection({
           ))}
         </section>
         <section className="age">
-          <h2 className="h-Bio">Вік</h2>
+          <h2 className="h-Bio">
+Вік</h2>
           <input
             className="input-age"
             type="number"
@@ -41,7 +43,10 @@ export default function BioSection({
           <button
             type="button"
             key={option.label}
-            onClick={() => handleOptionSelect("person", option.label)}
+            onClick={() => {
+              handleOptionSelect("person", option.label);
+              if (scrollToNextSection) scrollToNextSection();
+            }}
             className={isActive ? "active" : ""}
           >
             {option.label}
@@ -50,4 +55,6 @@ export default function BioSection({
       })}
     </section>
   );
-}
+});
+
+export default BioSection;

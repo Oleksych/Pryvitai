@@ -5,6 +5,7 @@ import {
   optionsHobbies,
   optionsPerson,
   optionsGreetingSubject,
+  optionsTraits,
 } from "../../data/options";
 import "./Main.css";
 
@@ -16,6 +17,8 @@ import CardMoodSection from "./CardMoodSection";
 import PhotoSection from "./PhotoSection";
 import BioSection from "./BioSection";
 import HobbiSection from "./HobbiSection";
+import TraitsSection from "./TraitsSection";
+import GreetingSubjectSection from "./GreetingSubjectSection";
 import GreetingTextSection from "./GreetingTextSection";
 import MainDuplicateBtn from "./MainDuplicateBtn";
 
@@ -29,6 +32,8 @@ export const Main = () => {
     hobbies: [], // масив
     hobbiesDescription: "",
     customHobby: "",
+    traits: [], // масив для рис та цінностей
+    customTrait: "",
     appearanceDescription: "",
     photoFile: null,
     cardStyle: "",
@@ -37,13 +42,38 @@ export const Main = () => {
   });
 
   const [customHobby, setCustomHobby] = useState("");
+  const [customTrait, setCustomTrait] = useState("");
   const [customCardStyle, setCustomCardStyle] = useState("");
   const [customCardMood, setCustomCardMood] = useState("");
   const [loading, setLoading] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [isFixedButtonVisible, setIsFixedButtonVisible] = useState(true);
+  const [showAdditionalSections, setShowAdditionalSections] = useState(false);
+  const [textIdeas, setTextIdeas] = useState(["", "", "", "", ""]);
+  const [isGeneratingText, setIsGeneratingText] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
   const initialHeight = useRef(window.innerHeight);
   const duplicateBtnRef = useRef(null);
+
+  // Додаю рефи для секцій
+  const cardStyleRef = useRef(null);
+  const cardMoodRef = useRef(null);
+  const bioRef = useRef(null);
+  const hobbiRef = useRef(null); // Додаю реф для HobbiSection
+  const greetingTextRef = useRef(null);
+  const greetingSubjectRef = useRef(null);
+  const traitsRef = useRef(null);
+
+  // Функція для прокрутки до рефа з відступом
+  const scrollToRef = (ref) => {
+    if (ref && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      // Відступ: трохи вище середини екрану
+      const offset = rect.top + scrollTop - window.innerHeight / 2.5;
+      window.scrollTo({ top: offset, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -115,6 +145,47 @@ export const Main = () => {
           return prev;
         }
       });
+    } else if (field === "traits") {
+      setCustomTrait((prevCustom) => prevCustom); // не чистимо текст одразу
+
+      setFormData((prev) => {
+        const alreadySelected = prev.traits.includes(value);
+        if (alreadySelected) {
+          // Прибираємо вибране
+          return {
+            ...prev,
+            traits: prev.traits.filter((trait) => trait !== value),
+          };
+        } else if (prev.traits.length < 4) {
+          // Додаємо, якщо менше 4
+          return {
+            ...prev,
+            traits: [...prev.traits, value],
+          };
+        } else {
+          return prev; // ліміт досягнуто
+        }
+      });
+    } else if (field === "customTrait") {
+      const trimmedValue = value.trim();
+      setCustomTrait(trimmedValue);
+
+      setFormData((prev) => {
+        // Відфільтровуємо попередній текст (той, що не в кнопках)
+        const filtered = prev.traits.filter((trait) =>
+          optionsTraits.includes(trait)
+        );
+        if (trimmedValue === "") {
+          // Якщо поле очищене — залишаємо тільки кнопки
+          return { ...prev, traits: filtered };
+        } else if (filtered.length < 4) {
+          // Додаємо/замінюємо свій варіант, якщо ліміт не досягнуто
+          return { ...prev, traits: [...filtered, trimmedValue] };
+        } else {
+          // Якщо ліміт досягнуто — не додаємо текст
+          return prev;
+        }
+      });
     } else {
       // Для інших полів просто оновлюємо значення
       setFormData((prev) => ({ ...prev, [field]: value }));
@@ -158,6 +229,7 @@ export const Main = () => {
       age: "",
       greetingSubject: "",
       hobbies: [],
+      traits: [],
       appearanceDescription: "",
       photoFile: null,
       cardStyle: "",
@@ -165,8 +237,13 @@ export const Main = () => {
       greetingText: "",
     });
     setCustomHobby("");
+    setCustomTrait("");
     setCustomCardStyle("");
     setCustomCardMood("");
+    setShowAdditionalSections(false);
+    setTextIdeas(["", "", "", "", ""]);
+    setIsGeneratingText(false);
+    setEditingIndex(null);
   };
 
 const handleSubmit = async (e) => {
@@ -183,7 +260,8 @@ const handleSubmit = async (e) => {
 // Опис зовнішності або фото отримувача листівки${uploadedImageUrl}
   const submitData = `Сформуй короткий, художній промт та опис сюжету для генерації зображення в DALL-E,  стиль зображення - ${formData.cardStyle}, настрій зображення - ${formData.cardMood}, та враховуй наступне фото: ${uploadedImageUrl}, для генерації подібних речей, персонажів або для натхнення сюжету (але хай DALL-E не вигадує персонажів яких немає на закріпленому фото або далі в описі).
   Додай до композиції сюжету наступні атрибути та символи або ті речі які прямо асоціюються з наступними хобі, захопленнями або родом діяльності: ${formData.hobbies}. Вбудуй їх логічно та послідовно до композиції щоб все було на своїх місцях та доповнювало сюжет, але не треба малювати забагато речей на зображенні, малюй їх менше але чіткіше.
-  Також для генерації сюжету використовуй, атрибути, символи та сенси з наступного тексту привітання: ${formData.greetingText}. На основі тексту привітання будуй логічну сюжетну композицію де всі речі на своїх місцях, доповнюють композицію та при цьому не перевантажують великою кількістю не потрібних та недомальованих деталей, певні сенси тексту привітання можна проігнорувати заради подальшої чіткості композиції згенерованого зображення.
+  Також врахуй риси та цінності особистості: ${formData.traits}. Відобрази ці якості через візуальні символи, емоції, атмосферу або деталі композиції, які передають ці характеристики.
+  Також для генерації сюжету використовуй, атрибути, символи та сенси з наступного тексту привітання: ${formData.greetingText}. На основі тексту привітання будуй логічну сюжетну композицію де всі речі на своїх місцях, доповнюють композицію та при цьому не перевантажують великою кількістю не потрібних та недомальованих деталей, певні сенси тексту привітання можна проігнорувати заради подальшої чіткості композиції згенерованого зображення, але не втрачай можливості відобразити дію про яку йдеться в тексті привітання або на яку натякається для щоб композиція була не банальна та дійсно мала сюжет.
 Саме згенероване зображення має бути без тексту.
 `;
 
@@ -236,9 +314,71 @@ const handleSubmit = async (e) => {
 
 
   const showGreetingIdeas = () => {
-    alert(
-      `Ідеї для тексту привітання:\n\n- В 30 років все тільки починається! Продовжуй рухатися до мети!\n- Бажаю здоров'я, щастя і нових звершень!\n- Нехай кожен день приносить радість і успіх!`
-    );
+    setShowAdditionalSections(true);
+  };
+
+  const generateTextIdeas = async () => {
+    setLoading(true);
+    setIsGeneratingText(true);
+    
+    try {
+      // Збираємо інформацію з необхідних секцій
+      const textPromptData = {
+        cardMood: formData.cardMood,
+        gender: formData.gender,
+        age: formData.age,
+        person: formData.person,
+        hobbies: formData.hobbies,
+        greetingSubject: formData.greetingSubject,
+        traits: formData.traits,
+      };
+
+      // Формуємо промпт для генерації тексту
+      const textPrompt = `Сформуй 5 коротких текстів привітання українською мовою для ${textPromptData.person} ${textPromptData.age} років, ${textPromptData.gender === 'Ч' ? 'чоловічої' : 'жіночої'} статі.
+
+Контекст привітання: ${textPromptData.greetingSubject || 'загальне привітання'}.
+
+Хобі та захоплення: ${textPromptData.hobbies.join(', ')}.
+
+Риси та цінності: ${textPromptData.traits.join(', ')}.
+
+Настрій: ${textPromptData.cardMood}.
+
+Тексти мають бути:
+- Не банальними та доречними
+- Враховувати вік та стать
+- Відповідати на настрою ${textPromptData.cardMood}
+- Містити елементи з хобі та рис характеру
+- Бути короткими (1-2 речення)
+- Без банальних метафор
+- Без зайвих формальностей
+Також текст має добре підходити для того щоб на основі нього було створено художній промпт для генерації сюжетного зображення у DALL-E`;
+
+      // Відправляємо до вебхуку
+      const response = await fetch("https://hook.eu2.make.com/YOUR_TEXT_WEBHOOK_URL", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          prompt: textPrompt,
+          userData: textPromptData
+        }),
+      });
+
+      const result = await response.text();
+      console.log("Результат генерації тексту:", result);
+      
+      // Тут можна додати логіку для відображення результатів
+      alert("Ідеї тексту згенеровано! Перевірте консоль для результатів.");
+      
+    } catch (error) {
+      console.error("Помилка генерації тексту:", error);
+      alert("Помилка при генерації ідей тексту: " + error.message);
+    } finally {
+      setLoading(false);
+      setIsGeneratingText(false);
+    }
   };
 
   const progress = getFormProgress(formData);
@@ -253,19 +393,23 @@ const handleSubmit = async (e) => {
 
 
 <CardStyleSection
+  ref={cardStyleRef}
   cardStyleOptions={cardStyleOptions}
   formData={formData}
   customCardStyle={customCardStyle}
   setCustomCardStyle={setCustomCardStyle}
   handleOptionSelect={handleOptionSelect}
+  scrollToNextSection={() => scrollToRef(cardMoodRef)}
 />
 
 <CardMoodSection
+  ref={cardMoodRef}
   cardMoodOptions={cardMoodOptions}
   formData={formData}
   customCardMood={customCardMood}
   setCustomCardMood={setCustomCardMood}
   handleOptionSelect={handleOptionSelect}
+  scrollToNextSection={() => scrollToRef(bioRef)}
 />
 
 <PhotoSection
@@ -274,45 +418,16 @@ const handleSubmit = async (e) => {
 />
 
 <BioSection
+  ref={bioRef}
   formData={formData}
   handleOptionSelect={handleOptionSelect}
   genderOptions={genderOptions}
   filteredOptions={filteredOptions}
+  scrollToNextSection={() => scrollToRef(hobbiRef)}
 />
 
-{/* Наступна секція з чим вітаємо піде до сторінки: "FirstText" */}
-          {/* <section>
-            <h2>З чим вітаємо?</h2>
-
-            {optionsGreetingSubject.map((option) => {
-              const isActive = formData.greetingSubject === option;
-              return (
-                <button
-                  type="button"
-                  key={option}
-                  onClick={() => handleOptionSelect("greetingSubject", option)}
-                  className={isActive ? "active" : ""}
-                >
-                  {option}
-                </button>
-              );
-            })}
-
-            <input
-              type="text"
-              placeholder="Свій варіант"
-              value={
-                optionsGreetingSubject.includes(formData.greetingSubject)
-                  ? ""
-                  : formData.greetingSubject
-              }
-              onChange={(e) =>
-                handleOptionSelect("greetingSubject", e.target.value)
-              }
-            />
-          </section> */}
-
 <HobbiSection
+  ref={hobbiRef}
   formData={formData}
   handleOptionSelect={handleOptionSelect}
   customHobby={customHobby}
@@ -320,10 +435,174 @@ const handleSubmit = async (e) => {
 />
 
 <GreetingTextSection
+  ref={greetingTextRef}
   formData={formData}
   handleInputChange={handleInputChange}
   showGreetingIdeas={showGreetingIdeas}
+  scrollToNextSection={() => scrollToRef(greetingSubjectRef)}
 />
+
+{showAdditionalSections && (
+  <>
+    <GreetingSubjectSection
+      ref={greetingSubjectRef}
+      formData={formData}
+      handleOptionSelect={handleOptionSelect}
+      optionsGreetingSubject={optionsGreetingSubject}
+      scrollToNextSection={() => scrollToRef(traitsRef)}
+    />
+
+    <TraitsSection
+      ref={traitsRef}
+      formData={formData}
+      handleOptionSelect={handleOptionSelect}
+      customTrait={customTrait}
+      optionsTraits={optionsTraits}
+    />
+
+    <button
+      type="button"
+      onClick={generateTextIdeas}
+      disabled={loading}
+      style={{
+        width: "100%",
+        maxWidth: "300px",
+        height: "50px",
+        backgroundColor: "#64255c",
+        color: "#ffffff",
+        fontSize: "16px",
+        fontWeight: "300",
+        border: "none",
+        borderRadius: "30px",
+        cursor: "pointer",
+        transition: "background-color 0.3s ease",
+        margin: "20px auto",
+        display: "block"
+      }}
+    >
+      {loading ? "Генеруємо ідеї..." : "Генерувати ідеї тексту"}
+    </button>
+
+    <div style={{
+      marginTop: "30px",
+      padding: "20px",
+      backgroundColor: "#f8f9fa",
+      borderRadius: "12px",
+      border: "1px solid #e9ecef"
+    }}>
+      <h3 style={{
+        marginBottom: "20px",
+        fontSize: "18px",
+        fontWeight: "600",
+        color: "#333",
+        textAlign: "center"
+      }}>
+        Ваші ідеї тексту
+      </h3>
+      
+      {textIdeas.map((idea, index) => (
+        <div key={index} style={{
+          marginBottom: "15px",
+          padding: "15px",
+          backgroundColor: "#fff",
+          borderRadius: "8px",
+          border: "1px solid #dee2e6",
+          position: "relative"
+        }}>
+          <textarea
+            value={idea}
+            onChange={(e) => {
+              const newIdeas = [...textIdeas];
+              newIdeas[index] = e.target.value;
+              setTextIdeas(newIdeas);
+            }}
+            placeholder={isGeneratingText ? "Генеруємо ідеї тексту привітання..." : "Тут буде Ваша ідея тексту привітання"}
+            disabled={isGeneratingText}
+            data-index={index}
+            style={{
+              width: "100%",
+              minHeight: "60px",
+              padding: "10px",
+              border: editingIndex === index ? "2px solid #007bff" : "1px solid #ced4da",
+              borderRadius: "6px",
+              fontSize: "14px",
+              resize: "vertical",
+              fontFamily: "inherit",
+              backgroundColor: editingIndex === index ? "#f8f9ff" : "#fff"
+            }}
+            onFocus={() => setEditingIndex(index)}
+            onBlur={() => setEditingIndex(null)}
+          />
+          <div style={{
+            display: "flex",
+            gap: "10px",
+            marginTop: "10px",
+          }}>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingIndex(index);
+                // Фокус на textarea
+                const textarea = document.querySelector(`textarea[data-index="${index}"]`);
+                if (textarea) {
+                  textarea.focus();
+                }
+              }}
+              disabled={isGeneratingText}
+              style={{
+                padding: "6px 12px",
+                fontSize: "12px",
+                backgroundColor: "#6c757d",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}
+            >
+              Редагувати
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                // Копіюємо текст в поле GreetingText
+                console.log("Копіюємо текст:", idea);
+                setFormData(prev => ({
+                  ...prev,
+                  greetingText: idea
+                }));
+                // Ховаємо додаткові секції
+                setShowAdditionalSections(false);
+                
+                // Прокручуємо до поля GreetingText
+                setTimeout(() => {
+                  const greetingTextInput = document.querySelector('input[placeholder*="Бажаю кошачої"]');
+                  if (greetingTextInput) {
+                    greetingTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }, 100);
+              }}
+              disabled={isGeneratingText || !idea.trim()}
+              style={{
+                padding: "6px 12px",
+                fontSize: "12px",
+                backgroundColor: "#28a745",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}
+            >
+              Обрати
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </>
+)}
+
+          {/* Додатковий відступ після блоку з ідеями тексту */}
+          {showAdditionalSections && <div style={{ height: "170px" }}></div>}
 
           {/* <section>
             <h2>Фон</h2>
@@ -344,9 +623,10 @@ const handleSubmit = async (e) => {
   progress={progress}
   loading={loading}
   duplicateBtnRef={duplicateBtnRef}
+  showAdditionalSections={showAdditionalSections}
 />
-  {/* Фіксований MainButton показується лише якщо клавіатура закрита і дублююча кнопка не видима */}
-  {!isKeyboardOpen && isFixedButtonVisible && <MainButton loading={loading} progress={progress} />}
+  {/* Фіксований MainButton показується лише якщо клавіатура закрита, дублююча кнопка не видима і не показуємо додаткові секції */}
+  {!isKeyboardOpen && isFixedButtonVisible && !showAdditionalSections && <MainButton loading={loading} progress={progress} />}
 
         </form>
       </div>
