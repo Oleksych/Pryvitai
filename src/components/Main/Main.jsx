@@ -52,6 +52,7 @@ export const Main = () => {
   const [textIdeas, setTextIdeas] = useState(["", "", "", "", ""]);
   const [isGeneratingText, setIsGeneratingText] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState("");
   const initialHeight = useRef(window.innerHeight);
   const duplicateBtnRef = useRef(null);
 
@@ -250,6 +251,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
 
+
   try {
     let uploadedImageUrl = "";
 
@@ -257,49 +259,30 @@ const handleSubmit = async (e) => {
     if (formData.photoFile) {
       uploadedImageUrl = await uploadImageToCloudinary(formData.photoFile);
     }
-// Опис зовнішності або фото отримувача листівки${uploadedImageUrl}
-  const submitData = `Сформуй короткий, художній промт та опис сюжету для генерації зображення в DALL-E,  стиль зображення - ${formData.cardStyle}, настрій зображення - ${formData.cardMood}, та враховуй наступне фото: ${uploadedImageUrl}, для генерації подібних речей, персонажів або для натхнення сюжету (але хай DALL-E не вигадує персонажів яких немає на закріпленому фото або далі в описі).
-  Додай до композиції сюжету наступні атрибути та символи або ті речі які прямо асоціюються з наступними хобі, захопленнями або родом діяльності: ${formData.hobbies}. Вбудуй їх логічно та послідовно до композиції щоб все було на своїх місцях та доповнювало сюжет, але не треба малювати забагато речей на зображенні, малюй їх менше але чіткіше.
-  Також врахуй риси та цінності особистості: ${formData.traits}. Відобрази ці якості через візуальні символи, емоції, атмосферу або деталі композиції, які передають ці характеристики.
-  Також для генерації сюжету використовуй, атрибути, символи та сенси з наступного тексту привітання: ${formData.greetingText}. На основі тексту привітання будуй логічну сюжетну композицію де всі речі на своїх місцях, доповнюють композицію та при цьому не перевантажують великою кількістю не потрібних та недомальованих деталей, певні сенси тексту привітання можна проігнорувати заради подальшої чіткості композиції згенерованого зображення, але не втрачай можливості відобразити дію про яку йдеться в тексті привітання або на яку натякається для щоб композиція була не банальна та дійсно мала сюжет.
-Саме згенероване зображення має бути без тексту.
+
+    // Опис зовнішності або фото отримувача листівки${uploadedImageUrl}
+    const submitData = `Стиль - ${formData.cardStyle}, настрій - ${formData.cardMood}, та враховуй наступне фото: ${uploadedImageUrl}, для генерації подібних речей, персонажів або для натхнення сюжету (але хай DALL-E не вигадує персонажів яких немає на закріпленому фото або далі в описі).
+    Додай до композиції сюжету наступні атрибути та символи або ті речі які прямо асоціюються з наступними хобі, захопленнями або родом діяльності: ${formData.hobbies}.
+    Також врахуй риси та цінності особистості: ${formData.traits}. Відобрази ці якості через візуальні символи, емоції, атмосферу або деталі композиції, які передають ці характеристики.
+    Також для генерації сюжету використовуй, атрибути, символи та сенси з наступного тексту привітання: ${formData.greetingText}. 
+Без тексту.
 `;
 
-    // Тепер формуємо дані для Make
-    // const submitData = new FormData();
-    // submitData.append("person", formData.person);
-    // submitData.append("gender", formData.gender);
-    // submitData.append("age", formData.age);
-    // submitData.append("greetingSubject", formData.greetingSubject);
-    // submitData.append("hobbies", formData.hobbies.join(", "));
-    // submitData.append("appearanceDescription", formData.appearanceDescription);
-    // submitData.append("photoUrl", uploadedImageUrl); // ⬅️ тільки URL
-    // submitData.append("cardStyle", formData.cardStyle);
-    // submitData.append("greetingText", formData.greetingText);
-    // submitData.append("promtForAI", promptForAI);
-    
-
-    // const response = await fetch("https://hook.eu2.make.com/o8eoc69ifeo4ne9pophf1io4q30wm23c", {
-    //   method: "POST",
-    //   body: submitData,
-    // });
-    const response = await fetch("https://hook.eu2.make.com/o8eoc69ifeo4ne9pophf1io4q30wm23c", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ prompt: submitData,
-    photoURl: uploadedImageUrl,
-   }), // ключ prompt — для Make
-});
-
-
-    const text = await response.text();
-    console.log("Відповідь сервера:", text);
-
-    if (text) {
-      const imageUrl = text.trim().replace(/^"+|"+$/g, "");
-      window.location.href = imageUrl;
+    // Відправляємо запит на локальний проксі для генерації зображення
+    const response = await fetch("https://vps66716.hyperhost.name:5000/api/generate-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: submitData }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      alert("Сталася помилка: " + (data.error || "Невідома помилка"));
+      return;
+    }
+    if (data.imageUrl) {
+      setGeneratedImageUrl(data.imageUrl);
       alert("Гіпінку надіслано успішно!");
       handleReset();
     } else {
@@ -320,7 +303,6 @@ const handleSubmit = async (e) => {
   const generateTextIdeas = async () => {
     setLoading(true);
     setIsGeneratingText(true);
-    
     try {
       // Збираємо інформацію з необхідних секцій
       const textPromptData = {
@@ -332,46 +314,27 @@ const handleSubmit = async (e) => {
         greetingSubject: formData.greetingSubject,
         traits: formData.traits,
       };
-
-      // Формуємо промпт для генерації тексту
-      const textPrompt = `Сформуй 5 коротких текстів привітання українською мовою для ${textPromptData.person} ${textPromptData.age} років, ${textPromptData.gender === 'Ч' ? 'чоловічої' : 'жіночої'} статі.
-
-Контекст привітання: ${textPromptData.greetingSubject || 'загальне привітання'}.
-
-Хобі та захоплення: ${textPromptData.hobbies.join(', ')}.
-
-Риси та цінності: ${textPromptData.traits.join(', ')}.
-
-Настрій: ${textPromptData.cardMood}.
-
-Тексти мають бути:
-- Не банальними та доречними
-- Враховувати вік та стать
-- Відповідати на настрою ${textPromptData.cardMood}
-- Містити елементи з хобі та рис характеру
-- Бути короткими (1-2 речення)
-- Без банальних метафор
-- Без зайвих формальностей
-Також текст має добре підходити для того щоб на основі нього було створено художній промпт для генерації сюжетного зображення у DALL-E`;
-
-      // Відправляємо до вебхуку
-      const response = await fetch("https://hook.eu2.make.com/YOUR_TEXT_WEBHOOK_URL", {
+      // Відправляємо на локальний бекенд
+      const response = await fetch("https://vps66716.hyperhost.name:5000/api/generate-greetings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          prompt: textPrompt,
-          userData: textPromptData
+        body: JSON.stringify({
+          traits: textPromptData.traits,
+          greetingSubject: textPromptData.greetingSubject,
+          gender: textPromptData.gender
         }),
       });
-
-      const result = await response.text();
-      console.log("Результат генерації тексту:", result);
-      
-      // Тут можна додати логіку для відображення результатів
-      alert("Ідеї тексту згенеровано! Перевірте консоль для результатів.");
-      
+      const data = await response.json();
+      if (data.ideas && Array.isArray(data.ideas)) {
+        setTextIdeas([
+          ...data.ideas,
+          ...Array(5 - data.ideas.length).fill("")
+        ].slice(0, 5));
+      } else {
+        alert("Не вдалося отримати ідеї тексту від сервера.");
+      }
     } catch (error) {
       console.error("Помилка генерації тексту:", error);
       alert("Помилка при генерації ідей тексту: " + error.message);
@@ -604,30 +567,25 @@ const handleSubmit = async (e) => {
           {/* Додатковий відступ після блоку з ідеями тексту */}
           {showAdditionalSections && <div style={{ height: "170px" }}></div>}
 
-          {/* <section>
-            <h2>Фон</h2>
-            <h5>Опціонально</h5>
-            <input
-              type="text"
-              placeholder="Наприклад: Берег річки та в даличині видніється історична частиа Києва"
-              value={formData.backgroundText}
-              onChange={handleInputChange("greetingText")}
-            />
-            <button type="button" onClick={showGreetingIdeas}>
-              Переглянути ідеї фону
-            </button>
-          </section> */}
+    
 
-  {/* Дублююча кнопка внизу контенту */}
-  <MainDuplicateBtn
-  progress={progress}
-  loading={loading}
-  duplicateBtnRef={duplicateBtnRef}
-  showAdditionalSections={showAdditionalSections}
-/>
-  {/* Фіксований MainButton показується лише якщо клавіатура закрита, дублююча кнопка не видима і не показуємо додаткові секції */}
-  {!isKeyboardOpen && isFixedButtonVisible && !showAdditionalSections && <MainButton loading={loading} progress={progress} />}
+          {/* Дублююча кнопка внизу контенту */}
+          <MainDuplicateBtn
+          progress={progress}
+          loading={loading}
+          duplicateBtnRef={duplicateBtnRef}
+          showAdditionalSections={showAdditionalSections}
+        />
+          {/* Фіксований MainButton показується лише якщо клавіатура закрита, дублююча кнопка не видима і не показуємо додаткові секції */}
+          {!isKeyboardOpen && isFixedButtonVisible && !showAdditionalSections && <MainButton loading={loading} progress={progress} />}
 
+          {/* Згенероване зображення під кнопкою */}
+          {generatedImageUrl && (
+            <div style={{ textAlign: "center", margin: "30px 0" }}>
+              <h2>Згенероване зображення</h2>
+              <img src={generatedImageUrl} alt="Згенероване" style={{ maxWidth: "100%", borderRadius: "16px", boxShadow: "0 2px 12px #ccc" }} />
+            </div>
+          )}
         </form>
       </div>
     </div>
