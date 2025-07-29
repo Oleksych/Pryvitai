@@ -12,14 +12,14 @@ import "./Main.css";
 import MainButton from "./MainButton";
 import { getFormProgress } from "../../utils/formProgress";
 import { useEffect, useRef, useState } from "react";
-import CardStyleSection from "./CardStyleSection";
-import CardMoodSection from "./CardMoodSection";
-import PhotoSection from "./PhotoSection";
-import BioSection from "./BioSection";
-import HobbiSection from "./HobbiSection";
-import TraitsSection from "./TraitsSection";
-import GreetingSubjectSection from "./GreetingSubjectSection";
-import GreetingTextSection from "./GreetingTextSection";
+import CardStyleSection from "../Sections/CardStyleSection";
+import CardMoodSection from "../Sections/CardMoodSection";
+import PhotoSection from "../Sections/PhotoSection";
+import BioSection from "../Sections/BioSection";
+import HobbiSection from "../Sections/HobbiSection";
+import TraitsSection from "../Sections/TraitsSection";
+import GreetingSubjectSection from "../Sections/GreetingSubjectSection";
+import GreetingTextSection from "../Sections/GreetingTextSection";
 import MainDuplicateBtn from "./MainDuplicateBtn";
 
 export const Main = () => {
