@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const CANVAS_MAX_WIDTH = 600;
-const PADDING = 0;
 const BANNER_HEIGHT = 100;
 
 const ImageCardEditor = ({ imageUrl, text }) => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -79,6 +81,30 @@ const ImageCardEditor = ({ imageUrl, text }) => {
     link.click();
   };
 
+  // Поділитися зображенням
+  const handleShare = () => {
+    const canvas = canvasRef.current;
+    canvas.toBlob((blob) => {
+      if (navigator.share && blob) {
+        const file = new File([blob], "pryvitai-card.png", { type: "image/png" });
+        navigator.share({
+          title: "Листівка з Привітайком",
+          files: [file]
+        });
+      } else {
+        // Fallback для десктопу
+        const dataUrl = canvas.toDataURL("image/png");
+        navigator.clipboard.writeText(dataUrl);
+        alert("Посилання скопійовано в буфер обміну");
+      }
+    }, "image/png");
+  };
+
+  // Створити нове зображення
+  const handleCreateNew = () => {
+    navigate("/");
+  };
+
   return (
     <div style={{
       display: "flex",
@@ -88,6 +114,26 @@ const ImageCardEditor = ({ imageUrl, text }) => {
       minHeight: "100vh",
       background: "#f7f7f7"
     }}>
+      <button
+        onClick={() => navigate("/")}
+        style={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          padding: "8px 16px",
+          fontSize: 14,
+          borderRadius: 8,
+          border: "none",
+          background: "#6c757d",
+          color: "#fff",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px"
+        }}
+      >
+        ← Назад
+      </button>
       <canvas
         ref={canvasRef}
         style={{
@@ -99,23 +145,93 @@ const ImageCardEditor = ({ imageUrl, text }) => {
           background: "#fff"
         }}
       />
-      <button
-        onClick={handleDownload}
-        style={{
-          marginTop: 32,
-          padding: "12px 32px",
-          fontSize: 18,
-          borderRadius: 24,
-          border: "none",
-          background: "#64255c",
-          color: "#fff",
-          fontWeight: 600,
-          cursor: "pointer",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.06)"
-        }}
-      >
-        Завантажити листівку
-      </button>
+      <div style={{
+        display: "flex",
+        gap: "15px",
+        justifyContent: "center",
+        flexWrap: "wrap",
+        marginTop: 32,
+        "@media (max-width: 768px)": {
+          flexDirection: "column",
+          alignItems: "center"
+        }
+      }}>
+        <button
+          onClick={handleDownload}
+          style={{
+            padding: "12px 24px",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            minWidth: "120px",
+            backgroundColor: "#28a745",
+            color: "white"
+          }}
+          onMouseOver={(e) => {
+            e.target.style.backgroundColor = "#218838";
+            e.target.style.transform = "translateY(-1px)";
+          }}
+          onMouseOut={(e) => {
+            e.target.style.backgroundColor = "#28a745";
+            e.target.style.transform = "translateY(0)";
+          }}
+        >
+          Завантажити
+        </button>
+        <button
+          onClick={handleShare}
+          style={{
+            padding: "12px 24px",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            minWidth: "120px",
+            backgroundColor: "#007bff",
+            color: "white"
+          }}
+          onMouseOver={(e) => {
+            e.target.style.backgroundColor = "#0056b3";
+            e.target.style.transform = "translateY(-1px)";
+          }}
+          onMouseOut={(e) => {
+            e.target.style.backgroundColor = "#007bff";
+            e.target.style.transform = "translateY(0)";
+          }}
+        >
+          Поділитися
+        </button>
+        <button
+          onClick={handleCreateNew}
+          style={{
+            padding: "12px 24px",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            minWidth: "120px",
+            backgroundColor: "#6c757d",
+            color: "white"
+          }}
+          onMouseOver={(e) => {
+            e.target.style.backgroundColor = "#545b62";
+            e.target.style.transform = "translateY(-1px)";
+          }}
+          onMouseOut={(e) => {
+            e.target.style.backgroundColor = "#6c757d";
+            e.target.style.transform = "translateY(0)";
+          }}
+        >
+          Створити нове
+        </button>
+      </div>
     </div>
   );
 };

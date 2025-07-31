@@ -13,6 +13,16 @@ export default function MainDuplicateBtn({ progress, loading, duplicateBtnRef, s
       >
         {loading ? "Генеруємо привітайку..." : "Згенерувати зображення"}
       </button>
+      {loading && (
+        <p style={{ 
+          textAlign: "center", 
+          marginTop: "10px", 
+          color: "#666",
+          fontSize: "14px"
+        }}>
+          Генерація зображення займатиме близько 1-3 хвилин
+        </p>
+      )}
       <div style={{ height: "160px" }}></div> {/* просто відступ */}
     </>
   );
